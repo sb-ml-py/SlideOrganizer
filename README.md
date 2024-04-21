@@ -1,2 +1,2 @@
-# SlideboxSuite
-A self-contained group of progams to allow storage, organization, and viewing of digital slides
+# SlideOrganizer
+A simple python program to interface with an SQLite database for the purpose of organizing digital slides.
