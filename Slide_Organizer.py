@@ -75,7 +75,8 @@ Note: All entries are case-sensitive.
 ''')
 
 #Open slidebox
-db_path = 'C:\\Francesca\\Documents\\Coding\\Slidebox\\Lib\\SQLite\\slidebox.db'
+cwd = os.getcwd()
+db_path = cwd + '\\Lib\\SQLite\\slidebox.db'
 con, cur = openDatabase(db_path)
 
 try:
@@ -96,7 +97,7 @@ try:
             print('''
             Search type:
             1 - Case ID
-            2 - Slide name
+            2 - Slide filename
             3 - Diagnosis
             4 - Tissue Type
             5 - Year
@@ -172,7 +173,7 @@ try:
             print('''
             Search type:
             1 - Case ID
-            2 - Slide name
+            2 - Slide filename
             3 - Stain
             5 - Diagnosis
             5 - Tissue Type
@@ -187,7 +188,7 @@ try:
                     ent_cat = 'case_ID'
                     break
                 elif ent_cat == '2':
-                    ent_cat = 'name'
+                    ent_cat = 'filename'
                     break
                 elif ent_cat == '3':
                     ent_cat = 'stain'
