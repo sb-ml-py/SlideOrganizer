@@ -41,9 +41,9 @@ def addEntry(con, cur, strline):
     print('Slide added.')
 #
 
-def delEntry(con, cur, Entry_name):
+def delEntry(con, cur, entry_ID):
     #Remove slide from slidebox
-    delstr = "DELETE FROM slide WHERE filename = '" + str(Entry_name) + "';"
+    delstr = "DELETE FROM slide WHERE filename = '" + str(entry_ID) + "';"
     cur.execute(delstr)
     #Save (commit) the insertion
     con.commit()
@@ -75,8 +75,7 @@ Note: All entries are case-sensitive.
 ''')
 
 #Open slidebox
-cwd = os.getcwd()
-db_path = cwd + '\\Lib\\SQLite\\slidebox.db'
+db_path = 'C:\\Francesca\\Documents\\Coding\\Slidebox\\Lib\\SQLite\\slidebox.db'
 con, cur = openDatabase(db_path)
 
 try:
@@ -155,7 +154,7 @@ try:
         #Remove slide from slidebox
         elif choice == '4':
             entry_ID = input('Enter filename of slide to be deleted: ')
-            delsld = "SELECT case_ID, filename, stain, diagnosis, tissue_type, history, year FROM slide WHERE name = '" + entry_ID + "';"
+            delsld = "SELECT case_ID, filename, stain, diagnosis, tissue_type, history, year FROM slide WHERE filename = '" + entry_ID + "';"
             res = cur.execute(delsld)
             reslist = res.fetchall()
             table = [('Case ID', 'Filename', 'Stain', 'Diagnosis', 'Tissue', 'History', 'Year')]
