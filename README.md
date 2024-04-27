@@ -3,19 +3,9 @@ A simple python program to interface with an SQLite database for the purpose of 
 
 ## Prerequisites
 1. Python
-2. SQLite
+2. Additional Python libraries: openpyxl, tabulate
+For help setting up Python with the appropriate libraries, see How to Setup Python
 
-## Instructions (Portable)
-1. Set up a digital slidebox as follows. Main folder: Slidebox. Subfolders: Lib, Slides. Files: Slide_Organizer.py
-2. Install SQLite in Lib folder
-3. Install Python in Lib folder
-4. Store your slides (.svs files) in Slides folder
-
-## Instructions (Non-Portable)
-1. Set up a digital slidebox as follows. Main folder: Slidebox. Subfolders: Lib, Slides. Files: Slide_Organizer.py
-2. Install SQLite in Lib folder
-3. Store your slides (.svs files) in Slides folder
-4. ...
-
-
-   
+## Instructions
+1. Download Slide_Organizer.py into your desired slidebox folder. This can be on a removable drive or on a computer.
+2. Run Slide_Organizer.py with Python
