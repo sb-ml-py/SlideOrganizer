@@ -1,62 +1,12 @@
 #Python SQLite Database Code
 
+#Import relevant Dictionaries
 import sqlite3
 from tabulate import tabulate
 import os
+import SQL_InterfaceFunctions as SIF    #This is a list of functions that work w SQLite
 
 #Define functions
-def openDatabase(db_path):
-    #Interface with database
-    import sqlite3
-    try:
-        #Connect to DB and create a cursor
-        con = sqlite3.connect(db_path)
-        cur = con.cursor()
-        print('DB Init')
-        
-        #Create table, slide, with categories ID_num, diagnosis, and tissue_type if not already created
-        cur.execute("CREATE TABLE if not exists slide(case_ID, filename, stain, diagnosis, tissue_type, history, year)")
-        
-        return con, cur
-    # Handle errors
-    except sqlite3.Error as error:
-        print('Error occurred - ', error)
-#
-
-def closeDatabase(con, cur):
-    #Close interface with database
-    if con:
-        cur.close()
-        con.close()
-        print('Slidebox closed.')
-#
-
-def addEntry(con, cur, strline):
-    #Add slide to slidebox
-    #Insert Data into table
-    cur.execute(strline)
-
-    #Save (commit) the insertion
-    con.commit()
-    print('Slide added.')
-#
-
-def delEntry(con, cur, entry_ID):
-    #Remove slide from slidebox
-    delstr = "DELETE FROM slide WHERE filename = '" + str(entry_ID) + "';"
-    cur.execute(delstr)
-    #Save (commit) the insertion
-    con.commit()
-    print('Slide removed')
-#
-
-def modEntry(con, cur, Entry_name, ent_cat, ent_var):
-    #Change details of slide
-    modstr = "UPDATE slide SET " + ent_cat + " = '" + ent_var + "' WHERE filename = '" + Entry_name + "'"
-    cur.execute(modstr)
-    con.commit()
-#
-
 
 
 #Instructions for use:
@@ -64,27 +14,40 @@ print('''
 Welcome to Slide Organizer
 
 Options:
+0 - Quit
 1 - View all slides
 2 - Search slides
 3 - Add slide
 4 - Remove slide
 5 - Edit slide
-6 - Quit
+6 - Add many slides, import from .xlsx file
+7 - Remove many slides, specified by .xlsx file
+8 - Print database to .xlsx file
 
 Note: All entries are case-sensitive.
 ''')
 
-#Open slidebox
+#Open slidebox independent of drive location -- for use in removable media / USB drives
+filepath = os.path.realpath(__file__)
+folderpath = os.path.dirname(filepath)
+os.chdir(folderpath)
 cwd = os.getcwd()
-db_path = cwd + '\\Lib\\SQLite\\slidebox.db'
-con, cur = openDatabase(db_path)
+filelist = ['Lib','SQLite','slidebox.db']
+db_path = cwd
+for name in filelist:
+    db_path = os.path.join(db_path, name)
+#
+con, cur = SIF.openDatabase(db_path)
 
 try:
     while True:
         #Prompt action
         choice = input('Enter choice of action (1-6): ')
         #View slidebox
-        if choice == '1':
+        if choice == '0':
+            SIF.closeDatabase(con, cur)
+            break
+        elif choice == '1':
             res = cur.execute("SELECT case_ID, filename, stain, diagnosis, tissue_type, history, year FROM slide ORDER BY case_ID ASC;")
             reslist = res.fetchall()
             table = [('Case ID', 'Filename', 'Stain', 'Diagnosis', 'Tissue', 'History', 'Year')]
@@ -97,7 +60,7 @@ try:
             print('''
             Search type:
             1 - Case ID
-            2 - Slide filename
+            2 - Slide name
             3 - Diagnosis
             4 - Tissue Type
             5 - Year
@@ -131,7 +94,7 @@ try:
                 reslist = res.fetchall()
                 table = [('Case ID', 'Filename', 'Stain', 'Diagnosis', 'Tissue', 'History', 'Year')]
                 for i in reslist:
-                    newtable = table.append(i)
+                    table.append(i)
                 print(tabulate(table))
                 #
         #Add slide to slidebox
@@ -148,7 +111,8 @@ try:
             ns_conf = input('Is this correct? (Y/N): ')
             if ns_conf == 'Y':
                 strline = "INSERT INTO slide VALUES ('" + ID + "', '" + name + "', '" + stn + "', '" + diag + "', '" + tissue + "', '" + hist + "', '" + year + "')"
-                addEntry(con, cur, strline)
+                SIF.addEntry(con, cur, strline)
+                print('Slide added.')
             else:
                 print('Entry not confirmed. New slide not added.')
             #
@@ -164,7 +128,8 @@ try:
             print(tabulate(table))
             d_conf = input('Remove the above slide(s)? (Y/N): ')
             if d_conf == 'Y':
-                delEntry(con, cur, entry_ID)
+                SIF.delEntry(con, cur, entry_ID)
+                print('Slide removed.')
             else:
                 print('Deletion not confirmed. No slides removed.')
         #
@@ -173,7 +138,7 @@ try:
             print('''
             Search type:
             1 - Case ID
-            2 - Slide filename
+            2 - Slide name
             3 - Stain
             5 - Diagnosis
             5 - Tissue Type
@@ -188,7 +153,7 @@ try:
                     ent_cat = 'case_ID'
                     break
                 elif ent_cat == '2':
-                    ent_cat = 'filename'
+                    ent_cat = 'name'
                     break
                 elif ent_cat == '3':
                     ent_cat = 'stain'
@@ -208,16 +173,83 @@ try:
             ent_var = input('Enter new information: ')
             mod_conf = input('For slide ' + Entry_name + ' change ' + ent_cat + ' to ' + ent_var + '.\nIs this correct? (Y/N): ')
             if mod_conf == 'Y':
-                modEntry(con, cur, Entry_name, ent_cat, ent_var)
+                SIF.modEntry(con, cur, Entry_name, ent_cat, ent_var)
             else:
                 print('Changes not confirmed. Changes not saved.')
-        #Quit
         elif choice == '6':
-            closeDatabase(con, cur)
-            break
+            xlsxpath = input('Enter path of .xlsx file: ')
+            if os.path.isabs(xlsxpath):
+
+                import openpyxl
+                wb = openpyxl.load_workbook(xlsxpath)
+                sheet = wb.active
+
+                table = [('Case ID', 'Filename', 'Stain', 'Diagnosis', 'Tissue', 'History', 'Year')]
+                for i in range(2, sheet.max_row):
+                    ID = str(sheet.cell(row = i, column = 1).value)
+                    name = str(sheet.cell(row = i, column = 2).value)
+                    stn = str(sheet.cell(row = i, column = 3).value)
+                    diag = str(sheet.cell(row = i, column = 4).value)
+                    tissue = str(sheet.cell(row = i, column = 5).value)
+                    hist = str(sheet.cell(row = i, column = 6).value)
+                    year = str(sheet.cell(row = i, column = 7).value)
+                    slidelist = (ID, name, stn, diag, tissue, hist, year)
+                    table.append(slidelist)
+                #
+
+                print(tabulate(table))
+                confirm = input('Add these. Is this correct? (Y/N): ')
+                if confirm == 'Y':
+                    SIF.addMany(con, cur, xlsxpath)
+                    print('Slides added.')
+                else:
+                    print('Not confirmed. No changes made.')
+                #
+        elif choice == '7':
+            xlsxpath = input('Enter path of .xlsx file: ')
+            if os.path.isabs(xlsxpath):
+
+                import openpyxl
+                wb = openpyxl.load_workbook(xlsxpath)
+                sheet = wb.active
+
+                table = [('Case ID', 'Filename', 'Stain', 'Diagnosis', 'Tissue', 'History', 'Year')]
+                for i in range(2, sheet.max_row):
+                    ID = str(sheet.cell(row = i, column = 1).value)
+                    name = str(sheet.cell(row = i, column = 2).value)
+                    stn = str(sheet.cell(row = i, column = 3).value)
+                    diag = str(sheet.cell(row = i, column = 4).value)
+                    tissue = str(sheet.cell(row = i, column = 5).value)
+                    hist = str(sheet.cell(row = i, column = 6).value)
+                    year = str(sheet.cell(row = i, column = 7).value)
+                    slidelist = (ID, name, stn, diag, tissue, hist, year)
+                    table.append(slidelist)
+                #
+
+                print(tabulate(table))
+                confirm = input('Remove these. Is this correct? (Y/N): ')
+                if confirm == 'Y':
+                    SIF.removeMany(con, cur, xlsxpath)
+                    print('Slides removed.')
+                else:
+                    print('Not confirmed. No changes made.')
+                #
+            else:
+                print('Please enter complete file path.')
+            #
+        elif choice == '8':
+            res = cur.execute("SELECT case_ID, filename, stain, diagnosis, tissue_type, history, year FROM slide ORDER BY case_ID ASC;")
+            reslist = res.fetchall()
+            table = [('Case ID', 'Filename', 'Stain', 'Diagnosis', 'Tissue', 'History', 'Year')]
+            for i in reslist:
+                table.append(i)
+            #
+            SIF.printDB(table)
+            printpath = os.path.join(folderpath, 'Slidebox_print.xlsx')
+            print('Database printed to', printpath)
         else:
             print('Please follow instructions.')
-            pass
+            pass    
 
 except sqlite3.Error as error:
         print('Error occurred - ', error)
