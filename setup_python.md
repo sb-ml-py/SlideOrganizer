@@ -20,7 +20,7 @@
 
 		>python -m pip install --upgrade pip
 
-5. Install package
+5. Install package (in this example the package is openpyxl)
 
    		>python -m pip install openpyxl
 
