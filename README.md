@@ -5,9 +5,9 @@ This database serves only to organize information associated with the slide coll
 
 I suggest creating a folder such as "Slidebox' that will house Slide_Organizer.py and a subfolder called "Slides" that will house the actual collection (.svs files). However for simplicity, you may wish to store your slide collection in the "slidebox_files" folder that the database resides in.
 
-## Prerequisites
-1. Python
-2. Additional Python libraries: openpyxl, tabulate
+## Dependencies
+1. [Python](https://www.python.org/downloads/)
+2. Additional Python libraries: [openpyxl](https://openpyxl.readthedocs.io/en/stable/tutorial.html), [tabulate](https://pypi.org/project/tabulate/)
 
 For help setting up Python with the appropriate libraries, see [How to Set Up Python](setup_python.md)
 
