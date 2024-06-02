@@ -239,9 +239,9 @@ try:
             print('''
             Search type:
             1 - Case ID
-            2 - Slide name
+            2 - Filename
             3 - Stain
-            5 - Diagnosis
+            4 - Diagnosis
             5 - Tissue Type
             6 - History
             7 - Year
@@ -254,7 +254,7 @@ try:
                     ent_cat = 'case_ID'
                     break
                 elif ent_cat == '2':
-                    ent_cat = 'name'
+                    ent_cat = 'filename'
                     break
                 elif ent_cat == '3':
                     ent_cat = 'stain'
